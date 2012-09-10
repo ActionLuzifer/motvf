@@ -64,15 +64,19 @@ def moveMovie(movie, dar):
     head, tail = os.path.split(movie) 
     print("head: ",head)
     print("tail: ",tail)
-    if head == "":
-        newpath = dar+"/"+tail
-    else:
-        newpath = head+"/"+dar+"/"+tail
-    if not os.path.exists(newpath):
-        print("rename to: ",newpath)
-        os.rename(movie, dar+"/"+movie)
-        htm = movie.replace("avi","htm")
-        os.rename(htm, dar+"/"+htm)
+    if os.path.exists(head+"/"+dar):
+        if head == "":
+            newpath = dar+"/"+tail
+        else:
+            newpath = head+"/"+dar+"/"+tail
+        if not os.path.exists(newpath):
+            print("rename ",movie ," to: ",newpath)
+            os.rename(movie, newpath)
+            
+            htm_old = movie.replace("avi","htm")
+            htm_new = newpath.replace("avi","htm")
+            print("rename ",htm_old ," to: ",htm_new)
+            os.rename(htm_old, htm_new)
         
 if __name__ == '__main__':
     mediaInfo = MediaInfo()
