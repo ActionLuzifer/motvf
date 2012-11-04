@@ -30,7 +30,7 @@ class MediaInfo(object):
         proc.wait();
         
         result = proc.returncode;
-        print("\nresult: ",result,"\n")
+        print("result: ",result,"")
         
         sstr = ""
         for istring in proc.stdout:
@@ -50,11 +50,8 @@ class MediaInfo(object):
     def getDAR(self, _infostr):
         DARre = "(.*)DAR (?P<DAR>(.)*)](.*)"
         REprogramm = re.compile(DARre)
-        #for line in _infostr:
         foundObject = REprogramm.search(_infostr)
         if foundObject:
-            #print(foundObject)
-            print(foundObject.group("DAR"))
             return foundObject.group("DAR")
         return None
         
@@ -62,21 +59,22 @@ class MediaInfo(object):
 def moveMovie(movie, dar):
     dar = dar.replace(":","_")
     head, tail = os.path.split(movie) 
-    print("head: ",head)
-    print("tail: ",tail)
-    if os.path.exists(head+"/"+dar):
+    if (head != "" and os.path.exists(head+"/"+dar)) or (head == "" and os.path.exists(dar)):
         if head == "":
             newpath = dar+"/"+tail
         else:
             newpath = head+"/"+dar+"/"+tail
         if not os.path.exists(newpath):
-            print("rename ",movie ," to: ",newpath)
-            os.rename(movie, newpath)
-            
-            htm_old = movie.replace("avi","htm")
-            htm_new = newpath.replace("avi","htm")
-            print("rename ",htm_old ," to: ",htm_new)
-            os.rename(htm_old, htm_new)
+            try:
+                print("rename ",movie ," to: ",newpath)
+                os.rename(movie, newpath)
+                
+                htm_old = movie.replace("avi","htm")
+                htm_new = newpath.replace("avi","htm")
+                print("rename ",htm_old ," to: ",htm_new)
+                os.rename(htm_old, htm_new)
+            except:
+                print("ups!!!!!!")
         
 if __name__ == '__main__':
     mediaInfo = MediaInfo()
@@ -84,7 +82,7 @@ if __name__ == '__main__':
     print(sys.argv[1])
     for arg in sys.argv:
         info = mediaInfo.getInfo(arg)
-        #print(info)
         dar = mediaInfo.getDAR(info)
         if dar is not None:
             moveMovie(movie=arg, dar=dar)
+    print("\n")
