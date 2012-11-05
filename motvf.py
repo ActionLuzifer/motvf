@@ -8,7 +8,6 @@ Created on 10.09.2012
 import subprocess
 import sys
 import os
-import string
 import re
 
 class MediaInfo(object):
@@ -21,16 +20,17 @@ class MediaInfo(object):
         '''
         Constructor
         '''
+        DARre = "(.*)DAR (?P<DAR>(.)*)](.*)"
+        self.DAR_REprogramm = re.compile(DARre)
+        PARre = "(.*)PAR (?P<PAR>(.)*) DAR(.*)"
+        self.PAR_REprogramm = re.compile(PARre)
+        
         
     def getInfo(self, _filename):
-        param = "-i "+_filename
-        print("param: ",param)
+        print(" -> ",_filename)
         proc = subprocess.Popen(['avconv', "-i", _filename], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE);
         proc.stdin.close();
         proc.wait();
-        
-        result = proc.returncode;
-        print("result: ",result,"")
         
         sstr = ""
         for istring in proc.stdout:
@@ -39,50 +39,90 @@ class MediaInfo(object):
         return sstr
         
 
-    def check4Paths(self):
-        for path in ["16_9", "4_3"]:
-            if os.path.exists(path):
-                print(path," existiert")
-            else:
-                print("angelegt: ",path)
-                os.mkdir(path)
+    def check4Paths(self, moveListen):
+        print()
+        print("Ordner anlegen: ...")
+        for darname, darlist in moveListen.items():
+            print("DAR Liste: "+darname)
+            for parname, parlist in darlist.items():
+                print("    PAR Liste: "+parname)
+                path = darname+"/"+parname
+                if os.path.exists(os.path.normpath(path)):
+                    print(path," existiert")
+                else:
+                    print("    --> angelegt: ",path)
+                    os.makedirs(path)
+        print("...done")
 
-    def getDAR(self, _infostr):
-        DARre = "(.*)DAR (?P<DAR>(.)*)](.*)"
-        REprogramm = re.compile(DARre)
-        foundObject = REprogramm.search(_infostr)
-        if foundObject:
-            return foundObject.group("DAR")
-        return None
-        
-        
-def moveMovie(movie, dar):
-    dar = dar.replace(":","_")
+
+    def getDPInfo(self, _infostr):
+        resultDAR = None
+        resultPAR = None
+        foundDAR = self.DAR_REprogramm.search(_infostr)
+        foundPAR = self.PAR_REprogramm.search(_infostr)
+        if foundDAR:
+            resultDAR = foundDAR.group("DAR").replace(":","_")
+        if foundPAR:
+            resultPAR = foundPAR.group("PAR").replace(":","_")
+        return resultDAR, resultPAR
+
+
+def moveMovie(movie, dar, par):
     head, tail = os.path.split(movie) 
-    if (head != "" and os.path.exists(head+"/"+dar)) or (head == "" and os.path.exists(dar)):
-        if head == "":
-            newpath = dar+"/"+tail
-        else:
-            newpath = head+"/"+dar+"/"+tail
-        if not os.path.exists(newpath):
-            try:
-                print("rename ",movie ," to: ",newpath)
-                os.rename(movie, newpath)
-                
-                htm_old = movie.replace("avi","htm")
-                htm_new = newpath.replace("avi","htm")
-                print("rename ",htm_old ," to: ",htm_new)
-                os.rename(htm_old, htm_new)
-            except:
-                print("ups!!!!!!")
+        
+    ## Schauen ob HEAD existiert
+    if head == "":
+        newpath = dar+"/"+par+"/"+tail
+    else:
+        newpath = head+"/"+dar+"/"+par+"/"+tail
+    newpath = os.path.normpath(newpath)
+
+    ## Pfad existiert, jetzt kann verschoben/umbenannt werden
+    try:
+        print("rename ",movie ," to: ",newpath)
+        os.rename(movie, newpath)
+        
+        htm_old = movie.replace("avi","htm")
+        htm_new = newpath.replace("avi","htm")
+        print("rename ",htm_old ," to: ",htm_new)
+        try:
+            os.rename(htm_old, htm_new)
+        except:
+            return
+    except:
+        print("ups!!!!!!")
         
 if __name__ == '__main__':
+    moveListen = {}
     mediaInfo = MediaInfo()
-    mediaInfo.check4Paths()
-    print(sys.argv[1])
-    for arg in sys.argv:
+    print("Bearbeite: ")
+    for arg in sys.argv[1:]:
         info = mediaInfo.getInfo(arg)
-        dar = mediaInfo.getDAR(info)
+        dar, par = mediaInfo.getDPInfo(info)
         if dar is not None:
-            moveMovie(movie=arg, dar=dar)
+            darlist = moveListen.get(dar, None)
+            if  darlist is None:
+                darlist = {}
+                moveListen[dar]=darlist
+                darlist['empty'] = []
+
+            if par is not None:
+                parlist = darlist.get(par, None)
+                if parlist is None:
+                    parlist = []
+                    darlist[par]=parlist
+            else:
+                parlist = darlist.get('empty')
+                
+            parlist.append(arg)
+
+    mediaInfo.check4Paths(moveListen)
+
     print("\n")
+    for darname, darlist in moveListen.items():
+        print("DAR Liste: "+darname)
+        for parname, parlist in darlist.items():
+            print("    PAR Liste: "+parname)
+            for moviename in parlist:
+                print("        "+moviename)
+                moveMovie(movie=moviename, dar=darname, par=parname)
