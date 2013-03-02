@@ -62,8 +62,12 @@ class MediaInfo(object):
         foundPAR = self.PAR_REprogramm.search(_infostr)
         if foundDAR:
             resultDAR = foundDAR.group("DAR").replace(":","_")
+        else:
+            resultDAR = None
         if foundPAR:
             resultPAR = foundPAR.group("PAR").replace(":","_")
+        else:
+            resultPAR = None
         return resultDAR, resultPAR
 
 
@@ -117,12 +121,15 @@ if __name__ == '__main__':
             parlist.append(arg)
 
     mediaInfo.check4Paths(moveListen)
-
-    print("\n")
-    for darname, darlist in moveListen.items():
-        print("DAR Liste: "+darname)
-        for parname, parlist in darlist.items():
-            print("    PAR Liste: "+parname)
-            for moviename in parlist:
-                print("        "+moviename)
-                moveMovie(movie=moviename, dar=darname, par=parname)
+    if ('--dry-run' in sys.argv[-1:]) or ('-d' in sys.argv[-1:]):
+        for darname, darlist in moveListen.items():
+            for parname, parlist in darlist.items():
+                print(darname.replace("_",":")+" & "+parname.replace("_",":"))
+    else:
+        for darname, darlist in moveListen.items():
+            print("DAR Liste: "+darname)
+            for parname, parlist in darlist.items():
+                print("    PAR Liste: "+parname)
+                for moviename in parlist:
+                    print("        "+moviename)
+                    moveMovie(movie=moviename, dar=darname, par=parname)
