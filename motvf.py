@@ -97,6 +97,7 @@ def moveMovie(movie, dar, par):
         print("ups!!!!!!")
         
 if __name__ == '__main__':
+    isDryRun = ('--dry-run' in sys.argv[-1:]) or ('-d' in sys.argv[-1:])
     moveListen = {}
     mediaInfo = MediaInfo()
     print("Bearbeite: ")
@@ -120,12 +121,12 @@ if __name__ == '__main__':
                 
             parlist.append(arg)
 
-    mediaInfo.check4Paths(moveListen)
-    if ('--dry-run' in sys.argv[-1:]) or ('-d' in sys.argv[-1:]):
+    if isDryRun:
         for darname, darlist in moveListen.items():
             for parname, parlist in darlist.items():
                 print(darname.replace("_",":")+" & "+parname.replace("_",":"))
     else:
+        mediaInfo.check4Paths(moveListen)
         for darname, darlist in moveListen.items():
             print("DAR Liste: "+darname)
             for parname, parlist in darlist.items():
