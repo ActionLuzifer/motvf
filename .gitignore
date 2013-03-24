@@ -1,0 +1,6 @@
+*.project
+*.pydevproject
+libav-win32-pthreads-20130324
+*.dll
+*.lib
+*.exe
