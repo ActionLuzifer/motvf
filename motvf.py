@@ -112,14 +112,13 @@ def moveMovie(movie, dar, par):
     ## Pfad existiert, jetzt kann verschoben/umbenannt werden
     try:
         print("rename ",movie ," to: ",newpath)
-        #os.rename(movie, newpath)
+        os.rename(movie, newpath)
         
         htm_old = movie.replace("avi","htm")
         htm_new = newpath.replace("avi","htm")
         print("rename ",htm_old ," to: ",htm_new)
         try:
-            #os.rename(htm_old, htm_new)
-            pass
+            os.rename(htm_old, htm_new)
         except:
             return
     except:
