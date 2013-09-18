@@ -24,11 +24,17 @@ class MediaInfo(object):
         self.DAR_REprogramm = re.compile(DARre)
         PARre = "(.*)PAR (?P<PAR>(.)*) DAR(.*)"
         self.PAR_REprogramm = re.compile(PARre)
-        
-        
+
+
     def getInfo(self, _filename):
+        if os.name == 'nt':
+            head, tail = os.path.split(sys.argv[0]) 
+            program = os.path.normpath(head+'\\libav-win32-pthreads-20130324\\usr\\bin\\avconv.exe')
+            print(program)
+        else:
+            program = 'avconf'
         print(" -> ",_filename)
-        proc = subprocess.Popen(['avconv', "-i", _filename], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE);
+        proc = subprocess.Popen([program, "-i", _filename], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE);
         proc.stdin.close();
         proc.wait();
         
@@ -37,7 +43,7 @@ class MediaInfo(object):
             sstr = sstr+istring.decode() 
         
         return sstr
-        
+
 
     def check4Paths(self, moveListen):
         print()
@@ -95,13 +101,39 @@ def moveMovie(movie, dar, par):
             return
     except:
         print("ups!!!!!!")
-        
+
+
+def searchFiles(args):
+    newfiles = []
+    for a in args:
+        print(a)
+    for arg in args:
+        if ('--dry-run' == arg) or ('-d' == arg):
+            isDryRun = True
+        else:
+            isDryRun = False
+            head, tail = os.path.split(arg)
+            tail = tail.replace("*", ".*")
+            if head == "":
+                head
+            files=os.listdir(head)
+            for file in files:
+                if re.match(tail, file):
+                    newfiles.append(os.path.normpath(head+"\\"+file))
+    return isDryRun, newfiles
+
+
 if __name__ == '__main__':
-    isDryRun = ('--dry-run' in sys.argv[-1:]) or ('-d' in sys.argv[-1:])
+    print(sys.argv)
+    if os.name == 'nt':
+        isDryRun, args = searchFiles(sys.argv[1:])
+    else:
+        isDryRun = ('--dry-run' in sys.argv[1:]) or ('-d' in sys.argv[1:])
+        args = sys.argv[1:]
     moveListen = {}
     mediaInfo = MediaInfo()
     print("Bearbeite: ")
-    for arg in sys.argv[1:]:
+    for arg in args:
         info = mediaInfo.getInfo(arg)
         dar, par = mediaInfo.getDPInfo(info)
         if dar is not None:
