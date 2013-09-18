@@ -82,21 +82,43 @@ def moveMovie(movie, dar, par):
         
     ## Schauen ob HEAD existiert
     if head == "":
-        newpath = dar+"/"+par+"/"+tail
+        if "16_9" in dar:
+            if ("64_45" in par) or ("1_1" in par):
+                newpath = dar+"/"+tail
+            else:
+                newpath = dar+"/"+par+"/"+tail
+        elif "4_3" in dar:
+            if ("16_15" in par) or ("1_1" in par):
+                newpath = dar+"/"+tail
+            else:
+                newpath = dar+"/"+par+"/"+tail 
+        else:
+            newpath = dar+"/"+par+"/"+tail
     else:
-        newpath = head+"/"+dar+"/"+par+"/"+tail
+        if "16_9" in dar:
+            if ("64_45" in par) or ("1_1" in par):
+                newpath = head+"/"+dar+"/"+tail
+            else:
+                newpath = head+"/"+dar+"/"+par+"/"+tail
+        elif "4_3" in dar:
+            if ("16_15" in par) or ("1_1" in par):
+                newpath = head+"/"+dar+"/"+tail
+            else:
+                newpath = head+"/"+dar+"/"+par+"/"+tail 
+        else:
+            newpath = head+"/"+dar+"/"+par+"/"+tail
     newpath = os.path.normpath(newpath)
 
     ## Pfad existiert, jetzt kann verschoben/umbenannt werden
     try:
         print("rename ",movie ," to: ",newpath)
-        os.rename(movie, newpath)
+        #os.rename(movie, newpath)
         
         htm_old = movie.replace("avi","htm")
         htm_new = newpath.replace("avi","htm")
         print("rename ",htm_old ," to: ",htm_new)
         try:
-            os.rename(htm_old, htm_new)
+            #os.rename(htm_old, htm_new)
         except:
             return
     except:
