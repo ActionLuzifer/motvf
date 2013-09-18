@@ -119,6 +119,7 @@ def moveMovie(movie, dar, par):
         print("rename ",htm_old ," to: ",htm_new)
         try:
             #os.rename(htm_old, htm_new)
+            pass
         except:
             return
     except:
