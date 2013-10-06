@@ -32,7 +32,7 @@ class MediaInfo(object):
             program = os.path.normpath(head+'\\libav-win32-pthreads-20130324\\usr\\bin\\avconv.exe')
             print(program)
         else:
-            program = 'avconf'
+            program = 'avconv'
         print(" -> ",_filename)
         proc = subprocess.Popen([program, "-i", _filename], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE);
         proc.stdin.close();
