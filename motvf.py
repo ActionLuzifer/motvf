@@ -45,22 +45,6 @@ class MediaInfo(object):
         return sstr
 
 
-    def check4Paths(self, moveListen):
-        print()
-        print("Ordner anlegen: ...")
-        for darname, darlist in moveListen.items():
-            print("DAR Liste: "+darname)
-            for parname, parlist in darlist.items():
-                print("    PAR Liste: "+parname)
-                path = darname+"/"+parname
-                if os.path.exists(os.path.normpath(path)):
-                    print(path," existiert")
-                else:
-                    print("    --> angelegt: ",path)
-                    os.makedirs(path)
-        print("...done")
-
-
     def getDPInfo(self, _infostr):
         resultDAR = None
         resultPAR = None
@@ -108,6 +92,10 @@ def moveMovie(movie, dar, par):
         else:
             newpath = head+"/"+dar+"/"+par+"/"+tail
     newpath = os.path.normpath(newpath)
+
+    ## Pfad erstellen
+    if not os.path.exists(os.path.split(newpath)[0]):
+        os.makedirs(os.path.split(newpath)[0])
 
     ## Pfad existiert, jetzt kann verschoben/umbenannt werden
     try:
@@ -180,7 +168,6 @@ if __name__ == '__main__':
             for parname, parlist in darlist.items():
                 print(darname.replace("_",":")+" & "+parname.replace("_",":"))
     else:
-        mediaInfo.check4Paths(moveListen)
         for darname, darlist in moveListen.items():
             print("DAR Liste: "+darname)
             for parname, parlist in darlist.items():
