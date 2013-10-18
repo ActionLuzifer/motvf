@@ -40,7 +40,10 @@ class MediaInfo(object):
         
         sstr = ""
         for istring in proc.stdout:
-            sstr = sstr+istring.decode() 
+            try:
+                sstr = sstr+istring.decode()
+            except:
+                sstr = sstr+istring.decode('ISO-8859-1') 
         
         return sstr
 
